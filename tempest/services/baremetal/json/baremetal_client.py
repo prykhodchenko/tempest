@@ -141,3 +141,33 @@ class BaremetalClientJSON(rest_client.RestClient):
         port = {'address': '01:23:45:67:89:0A'}
 
         return self._create_request('ports', port)
+
+    def delete_node(self, uuid):
+        """
+        Deletes a node having the specified UUID.
+
+        :param uuid: The unique identifier of the node.
+        :return: A tuple with the server response and the responce body.
+
+        """
+        return self._delete_request('nodes', uuid)
+
+    def delete_chassis(self, uuid):
+        """
+        Deletes a chassis having the specified UUID.
+
+        :param uuid: The unique identifier of the chassis.
+        :return: A tuple with the server response and the responce body.
+
+        """
+        return self._delete_request('chassis', uuid)
+
+    def delete_port(self, uuid):
+        """
+        Deletes a port having the specified UUID.
+
+        :param uuid: The unique identifier of the port.
+        :return: A tuple with the server response and the responce body.
+
+        """
+        return self._delete_request('ports', uuid)
