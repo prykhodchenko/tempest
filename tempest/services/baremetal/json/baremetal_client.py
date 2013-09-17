@@ -88,6 +88,21 @@ class BaremetalClientJSON(rest_client.RestClient):
         resp, body = self.delete(uri, self.headers)
         return resp, body
 
+    def _patch_request(self, resource_name, uuid, patch_object):
+        """
+        Patch specified object.
+
+        :param resource_name: The name of the REST resource, e.g., 'nodes'.
+        :param uuid: The unique identifier of an object in UUID format.
+        :return: A tuple with the server responce and the serialized patched
+                 object.
+
+        """
+        uri = self._get_uri(resource_name, uuid)
+        body = json.dumps(patch_object)
+
+        resp, body = self.patch(uri, self.headers, body=body)
+
     def list_nodes(self):
         """List all existing nodes."""
         return self._list_request('nodes')
@@ -171,3 +186,17 @@ class BaremetalClientJSON(rest_client.RestClient):
 
         """
         return self._delete_request('ports', uuid)
+
+    def update_node(self, uuid, **kwargs):
+        """
+        Update the specified node.
+
+        :param uuid: The unique identifier of the node.
+        :return: A tuple with the server responce and the updated node.
+
+        """
+        patch = [{"path": "/%s" % attr, "value": kwargs[attr], "op": "replace"}
+                 for attr in ('arch', 'cpus', 'disk', 'ram')
+                 if attr in kwargs]
+
+        return self._patch_request('nodes', uuid, patch)
