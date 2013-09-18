@@ -39,6 +39,28 @@ class BaremetalClientJSON(rest_client.RestClient):
                                            resource=resource_name,
                                            uuid='/%s' % uuid if uuid else '')
 
+    def _make_patch(self, allowed_attributes, serialize=False, **kw):
+        """
+        Create a JSON patch according to RFC 6902.
+
+        :param allowed_attributes: An iterable object that contains a set of
+            allowed attributes for an object.
+        :param serialize: Specifies, whether the patch should be serialized to
+            a JSON string or returned as a Python object.
+        :param **kw: Attributes and new values for them.
+        :return: A JSON path that sets values of the specified attributes to
+            the new ones.
+
+        """
+        patch = [{"path": "/%s" % attr, "value": kw[attr], "op": "replace"}
+                 for attr in allowed_attributes
+                 if attr in kw]
+
+        if serialize:
+            patch = json.dumps(patch)
+
+        return patch
+
     def _list_request(self, resource_name):
         """
         Get the list of objects of the specified type.
@@ -90,7 +112,7 @@ class BaremetalClientJSON(rest_client.RestClient):
 
     def _patch_request(self, resource_name, uuid, patch_object):
         """
-        Patch specified object.
+        Update specified object with JSON-patch.
 
         :param resource_name: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
@@ -195,8 +217,33 @@ class BaremetalClientJSON(rest_client.RestClient):
         :return: A tuple with the server responce and the updated node.
 
         """
-        patch = [{"path": "/%s" % attr, "value": kwargs[attr], "op": "replace"}
-                 for attr in ('arch', 'cpus', 'disk', 'ram')
-                 if attr in kwargs]
+        node_attributes = ('arch', 'cpus', 'disk', 'ram')
+        patch = self._make_patch(node_attributes, **kwargs)
 
         return self._patch_request('nodes', uuid, patch)
+
+    def update_chassis(self, uuid, **kwargs):
+        """
+        Update the specified chassis.
+
+        :param uuid: The unique identifier of the chassis.
+        :return: A tuple with the server responce and the updated chassis.
+
+        """
+        chassis_attributes = ('description')
+        patch = self._make_patch(chassis_attributes, **kwargs)
+
+        return self._patch_request('chassis', uuid, patch)
+
+    def update_port(self, uuid, **kwargs):
+        """
+        Update the specified port.
+
+        :param uuid: The unique identifier of the port.
+        :return: A tuple with the server responce and the updated port.
+
+        """
+        port_attributes = ('address')
+        patch = self._make_patch(port_attributes, **kwargs)
+
+        return self._patch_request('ports', uuid, patch)
