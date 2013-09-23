@@ -159,13 +159,14 @@ class BaremetalClientJSON(rest_client.RestClient):
         """
         Create a chassis with the specified parameters.
 
-        :param description: The description of the chassis. Default: my-chassis
+        :param description: The description of the chassis.
+            Default: test-chassis
         :return: A tuple with the server response and the created chassis.
 
         """
-        chassis = {'description': kwargs.get('description', 'my-chassis')}
+        chassis = {'description': kwargs.get('description', 'test-chassis')}
 
-        return self._create_request('nodes', chassis)
+        return self._create_request('chassis', chassis)
 
     def create_port(self, **kwargs):
         """

@@ -18,6 +18,8 @@
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
+from tempest.services.baremetal.json.baremetal_client import \
+    BaremetalClientJSON
 from tempest.services import botoclients
 from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
@@ -259,6 +261,10 @@ V3_TOKEN_CLIENT = {
 CREDENTIALS_CLIENT = {
     "json": CredentialsClientJSON,
     "xml": CredentialsClientXML,
+}
+
+BAREMETAL_CLIENT = {
+    "json": BaremetalClientJSON
 }
 
 
