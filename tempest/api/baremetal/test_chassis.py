@@ -13,6 +13,7 @@
 #    under the License.
 
 from tempest.api.baremetal import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -21,4 +22,7 @@ class TestChassis(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_create_chassis(self):
-        pass
+        descr = data_utils.rand_name('test-chassis')
+        ch = self.create_chassis(description=descr)
+
+        self.assertEqual(ch["description"], descr)

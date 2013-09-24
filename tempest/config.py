@@ -91,6 +91,23 @@ def register_identity_opts(conf):
         conf.register_opt(opt, group='identity')
 
 
+baremetal_group = cfg.OptGroup(name='baremetal',
+                               title='Baremetal provisioning service options')
+
+
+BaremetalGroup = [
+    cfg.StrOpt('catalog_type',
+               default='identity',
+               help="Catalog type of the Identity service."),
+]
+
+
+def register_baremetal_opts(conf):
+    conf.register_group(baremetal_group)
+    for opt in BaremetalGroup:
+        conf.register_opt(opt, group='baremetal')
+
+
 compute_group = cfg.OptGroup(name='compute',
                              title='Compute Service Options')
 
@@ -630,6 +647,7 @@ class TempestConfig:
 
         register_compute_opts(cfg.CONF)
         register_identity_opts(cfg.CONF)
+        register_baremetal_opts(cfg.CONF)
         register_image_opts(cfg.CONF)
         register_network_opts(cfg.CONF)
         register_volume_opts(cfg.CONF)
@@ -643,6 +661,7 @@ class TempestConfig:
         register_service_available_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.identity = cfg.CONF.identity
+        self.baremetal = cfg.CONF.baremetal
         self.images = cfg.CONF.image
         self.network = cfg.CONF.network
         self.volume = cfg.CONF.volume

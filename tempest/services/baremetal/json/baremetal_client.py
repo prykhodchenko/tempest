@@ -23,6 +23,7 @@ class BaremetalClientJSON(rest_client.RestClient):
     def __init__(self, config, username, password, auth_url, tenant_name=None):
         super(BaremetalClientJSON, self).__init__(config, username, password,
                                                   auth_url, tenant_name)
+        self.service = self.config.baremetal.catalog_type
         self.version = '1'
         self.uri_prefix = 'v%s' % self.version
 
@@ -35,8 +36,8 @@ class BaremetalClientJSON(rest_client.RestClient):
         :return: Relative URI for the resource or object.
 
         """
-        return '{pref}/{res}{uuid}'.format(prefix=self.uri_prefix,
-                                           resource=resource_name,
+        return '{pref}/{res}{uuid}'.format(pref=self.uri_prefix,
+                                           res=resource_name,
                                            uuid='/%s' % uuid if uuid else '')
 
     def _make_patch(self, allowed_attributes, serialize=False, **kw):

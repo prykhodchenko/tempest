@@ -315,6 +315,7 @@ class Manager(object):
             client_args_v3_auth = None
 
         try:
+            self.baremetal_client = BAREMETAL_CLIENT[interface](*client_args)
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
             self.network_client = NETWORKS_CLIENTS[interface](*client_args)
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)

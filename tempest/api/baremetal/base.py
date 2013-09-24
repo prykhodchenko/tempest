@@ -14,6 +14,7 @@
 
 import random
 
+from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import test
 
@@ -24,6 +25,10 @@ class BaseBaremetalTest(test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseBaremetalTest, cls).setUpClass()
+
+        mgr = clients.Manager()
+        cls.client = mgr.baremetal_client
+
         cls.created_chassis = []
         cls.created_nodes = []
         cls.created_ports = []
@@ -56,7 +61,7 @@ class BaseBaremetalTest(test.BaseTestCase):
         resp, body = cls.client.create_chassis(description=description)
 
         # TODO(romcheg): Check the responce to detect errors.
-        return body['chassis']
+        return body
 
     @classmethod
     def create_node(cls, arch='x86_64', cpus=8, disk=1024, ram=4096):
@@ -74,7 +79,7 @@ class BaseBaremetalTest(test.BaseTestCase):
                                             disk=disk, ram=ram)
 
         # TODO(romcheg): Check the responce to detect errors.
-        return body['node']
+        return body
 
     @classmethod
     def create_port(cls, address=None):
@@ -91,4 +96,4 @@ class BaseBaremetalTest(test.BaseTestCase):
         resp, body = cls.client.create_port(address=address)
 
         #TODO(romcheg): Check responce to detect errors.
-        return body['port']
+        return body
