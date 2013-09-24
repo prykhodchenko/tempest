@@ -142,17 +142,17 @@ class BaremetalClientJSON(rest_client.RestClient):
         """
         Create a baremetal node with the specified parameters.
 
-        :param arch: CPU architecture of the node. Default: x86_64.
-        :param cpus: Number of CPUs. Default: 8.
-        :param disk: Disk size. Default: 1024.
-        :param ram: Available RAM. Default: 4096.
+        :param cpu_arch: CPU architecture of the node. Default: x86_64.
+        :param cpu_num: Number of CPUs. Default: 8.
+        :param storage: Disk size. Default: 1024.
+        :param memory: Available RAM. Default: 4096.
         :return: A tuple with the server response and the created node.
 
         """
-        node = {'arch': kwargs.get('arch', 'x86_64'),
-                'cpus': kwargs.get('cpus', 8),
-                'disk': kwargs.get('disk', 1024),
-                'ram': kwargs.get('ram', 4096)}
+        node = {'properties': {'cpu_arch': kwargs.get('cpu_arch', 'x86_64'),
+                               'cpu_num': kwargs.get('cpu_num', 8),
+                               'storage': kwargs.get('storage', 1024),
+                               'memory': kwargs.get('memory', 4096)}}
 
         return self._create_request('nodes', node)
 
@@ -177,7 +177,7 @@ class BaremetalClientJSON(rest_client.RestClient):
         :return: A tuple with the server response and the created port.
 
         """
-        port = {'address': '01:23:45:67:89:0A'}
+        port = {'address': kwargs.get('address', '01:23:45:67:89:0A')}
 
         return self._create_request('ports', port)
 

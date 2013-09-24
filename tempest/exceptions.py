@@ -137,6 +137,10 @@ class IdentityError(TempestException):
     message = "Got identity error"
 
 
+class UnexcpectedResponceCode(TempestException):
+    message = "Expected responce code %(expected)s but received: %(received)s."
+
+
 class Duplicate(RestClientException):
     message = "An object with that identifier already exists"
 

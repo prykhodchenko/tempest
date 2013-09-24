@@ -12,11 +12,48 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import random
+import functools
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import exceptions as exc
 from tempest import test
+
+
+def creates(resource):
+    """Decorator that adds resources to the appropriate cleanup list."""
+
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(cls, **kwargs):
+            result = f(cls, **kwargs)
+            body = result[resource]
+
+            if 'uuid' in body:
+                cls.created_objects[resource].add(body['uuid'])
+
+            return result
+        return wrapper
+    return decorator
+
+
+def check_responce(expected_code):
+    """Decorator that checks responce code."""
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            result = f(*args, **kwargs)
+            status_code = result['responce']['status']
+            expected = str(expected_code)
+
+            if not kwargs.get('expect_errors', False):
+                if status_code != expected:
+                    raise exc.UnexcpectedResponceCode(expected=expected,
+                                                      received=status_code)
+
+            return result
+        return wrapper
+    return decorator
 
 
 class BaseBaremetalTest(test.BaseTestCase):
@@ -29,26 +66,25 @@ class BaseBaremetalTest(test.BaseTestCase):
         mgr = clients.Manager()
         cls.client = mgr.baremetal_client
 
-        cls.created_chassis = []
-        cls.created_nodes = []
-        cls.created_ports = []
+        cls.created_objects = {'chassis': set([]),
+                               'port': set([]),
+                               'node': set([])}
 
     @classmethod
     def tearDownClass(cls):
         """Ensure that all created objects get destroyed."""
 
         super(BaseBaremetalTest, cls).tearDownClass()
-        for chassis_id in cls.created_chassis:
-            cls.client.delete_chassis(chassis_id)
 
-        for node_id in cls.created_nodes:
-            cls.client.delete_chassis(node_id)
-
-        for port_id in cls.created_ports:
-            cls.client.delete_port(port_id)
+        for resource, uuids in cls.created_objects.iteritems():
+            delete_method = getattr(cls.client, 'delete_%s' % resource)
+            for u in uuids:
+                delete_method(u)
 
     @classmethod
-    def create_chassis(cls, description=None):
+    @creates('chassis')
+    @check_responce(200)
+    def create_chassis(cls, description=None, expect_errors=False):
         """
         Wrapper utility for creating test chassis.
 
@@ -60,28 +96,31 @@ class BaseBaremetalTest(test.BaseTestCase):
         description = description or data_utils.rand_name('test-chassis-')
         resp, body = cls.client.create_chassis(description=description)
 
-        # TODO(romcheg): Check the responce to detect errors.
-        return body
+        return {'chassis': body, 'responce': resp}
 
     @classmethod
-    def create_node(cls, arch='x86_64', cpus=8, disk=1024, ram=4096):
+    @creates('node')
+    @check_responce(200)
+    def create_node(cls, cpu_arch='x86', cpu_num=8, storage=1024, memory=4096):
         """
         Wrapper utility for creating test baremetal nodes.
 
-        :param arch: CPU architecture of the node. Default: x86_64.
-        :param cpus: Number of CPUs. Default: 8.
-        :param disk: Disk size. Default: 1024.
-        :param ram: Available RAM. Default: 4096.
+        :param cpu_arch: CPU architecture of the node. Default: x86.
+        :param cpu_num: Number of CPUs. Default: 8.
+        :param storage: Disk size. Default: 1024.
+        :param memory: Available RAM. Default: 4096.
         :return: Created node.
 
         """
-        resp, body = cls.client.create_node(arch=arch, cpus=cpus,
-                                            disk=disk, ram=ram)
+        resp, body = cls.client.create_node(cpu_arch=cpu_arch, cpu_num=cpu_num,
+                                            storage=storage, memory=memory)
 
         # TODO(romcheg): Check the responce to detect errors.
-        return body
+        return {'node': body, 'responce': resp}
 
     @classmethod
+    @creates('port')
+    @check_responce(200)
     def create_port(cls, address=None):
         """
         Wrapper utility for creating test ports.
@@ -91,9 +130,8 @@ class BaseBaremetalTest(test.BaseTestCase):
         :return: Created port.
 
         """
-        address = address or ':'.join([r"%02x" % random.randint(0x00, 0xff)
-                                       for i in range(6)])
+        address = address or data_utils.rand_mac_address()
         resp, body = cls.client.create_port(address=address)
 
         #TODO(romcheg): Check responce to detect errors.
-        return body
+        return {'port': body, 'responce': resp}

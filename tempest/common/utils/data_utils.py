@@ -31,6 +31,11 @@ def rand_int_id(start=0, end=0x7fffffff):
     return random.randint(start, end)
 
 
+def rand_mac_address():
+    return ':'.join([r"%02x" % random.randint(0x00, 0xff)
+                     for i in range(6)])
+
+
 def build_url(host, port, api_version=None, path=None,
               params=None, use_ssl=False):
     """Build the request URL from given host, port, path and parameters."""

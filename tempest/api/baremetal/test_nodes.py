@@ -13,16 +13,20 @@
 #    under the License.
 
 from tempest.api.baremetal import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
-class TestChassis(base.BaseBaremetalTest):
-    """Tests for chassis."""
+class TestNodes(base.BaseBaremetalTest):
+    """Tests for baremetal nodes."""
 
     @test.attr(type='smoke')
-    def test_create_chassis(self):
-        descr = data_utils.rand_name('test-chassis-')
-        ch = self.create_chassis(description=descr)['chassis']
+    def test_create_node(self):
+        params = {"cpu_arch": "x86_64",
+                  "cpu_num": "12",
+                  "storage": "10240",
+                  "memory": "1024"}
 
-        self.assertEqual(ch['description'], descr)
+        node = self.create_node(**params)['node']
+
+        for key in params:
+            self.assertEqual(node['properties'][key], params[key])

@@ -17,12 +17,13 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class TestChassis(base.BaseBaremetalTest):
-    """Tests for chassis."""
+class TestPorts(base.BaseBaremetalTest):
+    """Tests for ports."""
 
     @test.attr(type='smoke')
-    def test_create_chassis(self):
-        descr = data_utils.rand_name('test-chassis-')
-        ch = self.create_chassis(description=descr)['chassis']
+    def test_create_port(self):
+        address = data_utils.rand_mac_address()
 
-        self.assertEqual(ch['description'], descr)
+        port = self.create_port(address=address)['port']
+
+        self.assertEqual(port['address'], address)
